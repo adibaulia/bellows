@@ -21,6 +21,7 @@ func ExpandPrefixed(value map[string]interface{}, prefix string) map[string]inte
 	return m
 }
 
+// todo add slice support
 func ExpandPrefixedToResult(value map[string]interface{}, prefix string, result map[string]interface{}) {
 	if prefix != "" {
 		prefix += "."
