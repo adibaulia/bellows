@@ -59,11 +59,6 @@ func FlattenPrefixed(value interface{}, prefix string) map[string]interface{} {
 }
 
 func FlattenPrefixedToResult(value interface{}, prefix string, m map[string]interface{}) {
-	base := ""
-	if prefix != "" {
-		base = prefix + "."
-	}
-
 	original := reflect.ValueOf(value)
 	kind := original.Kind()
 	if kind == reflect.Ptr || kind == reflect.Interface {
@@ -86,12 +81,20 @@ func FlattenPrefixedToResult(value interface{}, prefix string, m map[string]inte
 			break
 		}
 		keys := original.MapKeys()
+		base := ""
+		if prefix != "" {
+			base = prefix + "."
+		}
 		for _, childKey := range keys {
 			childValue := original.MapIndex(childKey)
 			FlattenPrefixedToResult(childValue.Interface(), base+childKey.String(), m)
 		}
 	case reflect.Struct:
 		numField := original.NumField()
+		base := ""
+		if prefix != "" {
+			base = prefix + "."
+		}
 		for i := 0; i < numField; i += 1 {
 			childValue := original.Field(i)
 			childKey := t.Field(i).Name
@@ -99,6 +102,7 @@ func FlattenPrefixedToResult(value interface{}, prefix string, m map[string]inte
 		}
 	case reflect.Array, reflect.Slice:
 		l := original.Len()
+		base := prefix
 		for i := 0; i < l; i++ {
 			childValue := original.Index(i)
 			FlattenPrefixedToResult(childValue.Interface(), fmt.Sprintf("%s[%d]", base, i), m)
