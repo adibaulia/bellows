@@ -6,6 +6,7 @@
 package bellows
 
 import (
+	"fmt"
 	"reflect"
 	"strings"
 )
@@ -60,7 +61,7 @@ func FlattenPrefixed(value interface{}, prefix string) map[string]interface{} {
 func FlattenPrefixedToResult(value interface{}, prefix string, m map[string]interface{}) {
 	base := ""
 	if prefix != "" {
-		base = prefix+"."
+		base = prefix + "."
 	}
 
 	original := reflect.ValueOf(value)
@@ -69,6 +70,14 @@ func FlattenPrefixedToResult(value interface{}, prefix string, m map[string]inte
 		original = reflect.Indirect(original)
 		kind = original.Kind()
 	}
+
+	if !original.IsValid() {
+		if prefix != "" {
+			m[prefix] = nil
+		}
+		return
+	}
+
 	t := original.Type()
 
 	switch kind {
@@ -76,15 +85,23 @@ func FlattenPrefixedToResult(value interface{}, prefix string, m map[string]inte
 		if t.Key().Kind() != reflect.String {
 			break
 		}
-		for _, childKey := range original.MapKeys() {
+		keys := original.MapKeys()
+		for _, childKey := range keys {
 			childValue := original.MapIndex(childKey)
 			FlattenPrefixedToResult(childValue.Interface(), base+childKey.String(), m)
 		}
 	case reflect.Struct:
-		for i := 0; i < original.NumField(); i += 1 {
+		numField := original.NumField()
+		for i := 0; i < numField; i += 1 {
 			childValue := original.Field(i)
 			childKey := t.Field(i).Name
 			FlattenPrefixedToResult(childValue.Interface(), base+childKey, m)
+		}
+	case reflect.Array, reflect.Slice:
+		l := original.Len()
+		for i := 0; i < l; i++ {
+			childValue := original.Index(i)
+			FlattenPrefixedToResult(childValue.Interface(), fmt.Sprintf("%s[%d]", base, i), m)
 		}
 	default:
 		if prefix != "" {

@@ -2,7 +2,7 @@
 Flatten and expand golang maps and structs
 
 ## Features
-There are some existing golang flatten/expand implementations, but they are targeted to specific use-cases, and none of them flatten Structs.  This one doesn't do Slices, but the feature could be added.
+There are some existing golang flatten/expand implementations, but they are targeted to specific use-cases, and none of them flatten Structs.
 
 This `Flatten` will skip parsing a Map that does not have a String as the index.
 
