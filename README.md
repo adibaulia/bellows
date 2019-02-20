@@ -11,14 +11,8 @@ This `Flatten` recursively passes values as their original Interface, so it is s
 ## Usage
 
 ```go
-// Expand a dot-separated flat map into a nested map
-func Expand(value map[string]interface{}) map[string]interface{} {}
-
-// Expand a dot-separated flat map into a nested map, with a prefix
-func ExpandPrefixed(value map[string]interface{}, prefix string) map[string]interface{} {}
-
-// Expand a dot-separated flat map into an existing nested map, with a prefix
-func ExpandPrefixedToResult(value map[string]interface{}, prefix string, result map[string]interface{}) {}
+// Expand a dot-separated flat map into a nested maps and slices
+func Expand(flat map[string]interface{}) interface{}
 
 // Flatten a nested map into a dot-separated flat map
 func Flatten(value interface{}) map[string]interface{} {}
@@ -29,10 +23,6 @@ func FlattenPrefixed(value interface{}, prefix string) map[string]interface{} {}
 // Flatten a nested map into an existing dot-separated flat map, with a prefix
 func FlattenPrefixedToResult(value interface{}, prefix string, m map[string]interface{}) {}
 ```
-
-## Examples
-
-Used in [an update to Viper](https://github.com/doublerebel/viper), to normalize config values coming from nested (JSON) and flat (CLI flags, env vars) sources.
 
 ## Other golang flatten/expand implementations
 
