@@ -28,14 +28,26 @@ func put(dst interface{}, path []string, value interface{}) interface{} {
 	index, isArray := getArrayIndex(p)
 	if isArray {
 		if dst == nil {
-			dst = make([]interface{}, 0)
+			dst = make([]interface{}, 0, 3)
 		}
 		if arr, ok := dst.([]interface{}); ok {
-			if len(arr) <= index {
-				newDst := make([]interface{}, index+1)
-				copy(newDst, arr)
-				arr = newDst
-				arr[index] = put(nil, path[1:], value)
+			i := len(arr)
+			if i == index {
+				arr = append(arr, put(nil, path[1:], value))
+			} else if i < index {
+				toInsert := make([]interface{}, index-i)
+				newItem := put(nil, path[1:], value)
+				switch newItem.(type) {
+				case []interface{}:
+					for i := range toInsert {
+						toInsert[i] = make([]interface{}, 0)
+					}
+				case map[string]interface{}:
+					for i := range toInsert {
+						toInsert[i] = make(map[string]interface{}, 0)
+					}
+				}
+				arr = append(arr[:i], append(toInsert, newItem)...)
 			} else {
 				arr[index] = put(arr[index], path[1:], value)
 			}
