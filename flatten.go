@@ -54,7 +54,11 @@ func FlattenPrefixedToResult(value interface{}, prefix string, m map[string]inte
 		}
 		for i := 0; i < numField; i++ {
 			childValue := original.Field(i)
-			childKey := t.Field(i).Name
+			f := t.Field(i)
+			childKey := f.Name
+			if f.Anonymous {
+				childKey = ""
+			}
 			FlattenPrefixedToResult(childValue.Interface(), base+childKey, m)
 		}
 	case reflect.Array, reflect.Slice:

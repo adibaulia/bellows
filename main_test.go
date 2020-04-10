@@ -18,6 +18,16 @@ var (
 	flat = Flatten(example)
 )
 
+type A struct {
+	B
+	F int
+}
+
+type B struct {
+	C string
+	D int
+}
+
 func TestAll(t *testing.T) {
 	assert := assert.New(t)
 
@@ -27,6 +37,23 @@ func TestAll(t *testing.T) {
 	expecting, _ := json.Marshal(example)
 	actual, _ := json.Marshal(expanded)
 	assert.Equal(expecting, actual)
+}
+
+func TestAnonStructFlatten(t *testing.T) {
+	expecting := map[string]interface{}{
+		"F": 1,
+		"C": "test",
+		"D": 2,
+	}
+	src := A{
+		F: 1,
+		B: B{
+			C: "test",
+			D: 2,
+		},
+	}
+	actual := Flatten(src)
+	assert.Equal(t, expecting, actual)
 }
 
 func BenchmarkFlatten(b *testing.B) {
