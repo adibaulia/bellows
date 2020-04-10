@@ -20,7 +20,13 @@ var (
 
 type A struct {
 	B
-	F int
+	F     int
+	Inner Inner
+}
+
+type Inner struct {
+	B
+	V string
 }
 
 type B struct {
@@ -41,9 +47,12 @@ func TestAll(t *testing.T) {
 
 func TestAnonStructFlatten(t *testing.T) {
 	expecting := map[string]interface{}{
-		"F": 1,
-		"C": "test",
-		"D": 2,
+		"F":       1,
+		"C":       "test",
+		"D":       2,
+		"Inner.C": "",
+		"Inner.D": 0,
+		"Inner.V": "",
 	}
 	src := A{
 		F: 1,
@@ -51,6 +60,7 @@ func TestAnonStructFlatten(t *testing.T) {
 			C: "test",
 			D: 2,
 		},
+		Inner: Inner{},
 	}
 	actual := Flatten(src)
 	assert.Equal(t, expecting, actual)
