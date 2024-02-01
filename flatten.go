@@ -5,17 +5,20 @@ import (
 	"reflect"
 )
 
-func Flatten(value interface{}, sep string) map[string]interface{} {
-	return FlattenPrefixed(value, sep, "")
-}
-
-func FlattenPrefixed(value interface{}, sep string, prefix string) map[string]interface{} {
+func Flatten(value interface{}, opts ...option) map[string]interface{} {
+	options := &bellowsOptions{
+		prefix: "",
+		sep:    ".",
+	}
+	for _, opt := range opts {
+		opt(options)
+	}
 	m := make(map[string]interface{}, 5)
-	FlattenPrefixedToResult(value, sep, prefix, m)
+	FlattenPrefixedToResult(value, options, m)
 	return m
 }
 
-func FlattenPrefixedToResult(value interface{}, sep string, prefix string, m map[string]interface{}) {
+func FlattenPrefixedToResult(value interface{}, opts *bellowsOptions, m map[string]interface{}) {
 	original := reflect.ValueOf(value)
 	kind := original.Kind()
 	if kind == reflect.Ptr || kind == reflect.Interface {
@@ -24,8 +27,8 @@ func FlattenPrefixedToResult(value interface{}, sep string, prefix string, m map
 	}
 
 	if !original.IsValid() {
-		if prefix != "" {
-			m[prefix] = nil
+		if opts.prefix != "" {
+			m[opts.prefix] = nil
 		}
 		return
 	}
@@ -39,12 +42,15 @@ func FlattenPrefixedToResult(value interface{}, sep string, prefix string, m map
 		}
 		keys := original.MapKeys()
 		base := ""
-		if prefix != "" {
-			base = prefix + sep
+		if opts.prefix != "" {
+			base = opts.prefix + opts.sep
 		}
 		for _, childKey := range keys {
 			childValue := original.MapIndex(childKey)
-			FlattenPrefixedToResult(childValue.Interface(), sep, base+childKey.String(), m)
+			FlattenPrefixedToResult(childValue.Interface(), &bellowsOptions{
+				prefix: base + childKey.String(),
+				sep:    opts.sep,
+			}, m)
 		}
 	case reflect.Struct:
 		numField := original.NumField()
@@ -55,22 +61,28 @@ func FlattenPrefixedToResult(value interface{}, sep string, prefix string, m map
 			childKey := f.Name
 			if f.Anonymous {
 				childKey = ""
-				base = prefix
-			} else if prefix != "" {
-				base = prefix + sep
+				base = opts.prefix
+			} else if opts.prefix != "" {
+				base = opts.prefix + opts.sep
 			}
-			FlattenPrefixedToResult(childValue.Interface(), sep, base+childKey, m)
+			FlattenPrefixedToResult(childValue.Interface(), &bellowsOptions{
+				prefix: base + childKey,
+				sep:    opts.sep,
+			}, m)
 		}
 	case reflect.Array, reflect.Slice:
 		l := original.Len()
-		base := prefix
+		base := opts.prefix
 		for i := 0; i < l; i++ {
 			childValue := original.Index(i)
-			FlattenPrefixedToResult(childValue.Interface(), sep, fmt.Sprintf("%s%s[%d]", base, sep, i), m)
+			FlattenPrefixedToResult(childValue.Interface(), &bellowsOptions{
+				prefix: fmt.Sprintf("%s%s[%d]", base, opts.sep, i),
+				sep:    opts.sep,
+			}, m)
 		}
 	default:
-		if prefix != "" {
-			m[prefix] = value
+		if opts.prefix != "" {
+			m[opts.prefix] = value
 		}
 	}
 }
