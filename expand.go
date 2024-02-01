@@ -10,10 +10,10 @@ var (
 	arrayIndexRegexp = regexp.MustCompile("\\[\\d*]")
 )
 
-func Expand(flatMap map[string]interface{}) interface{} {
+func Expand(flatMap map[string]interface{}, sep string) interface{} {
 	var dst interface{}
 	for path, value := range flatMap {
-		parts := strings.Split(path, ".")
+		parts := strings.Split(path, sep)
 		dst = put(dst, parts, value)
 	}
 	return dst

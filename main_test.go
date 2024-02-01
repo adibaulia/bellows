@@ -2,8 +2,9 @@ package bellows
 
 import (
 	"encoding/json"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var (
@@ -15,7 +16,7 @@ var (
 			map[string]interface{}{"d": 2, "e": false, "t": "112"},
 		},
 	}
-	flat = Flatten(example)
+	flat = Flatten(example, ".")
 )
 
 type A struct {
@@ -37,8 +38,8 @@ type B struct {
 func TestAll(t *testing.T) {
 	assert := assert.New(t)
 
-	flat := Flatten(example)
-	expanded := Expand(flat)
+	flat := Flatten(example, ".")
+	expanded := Expand(flat, ".")
 
 	expecting, _ := json.Marshal(example)
 	actual, _ := json.Marshal(expanded)
@@ -62,25 +63,25 @@ func TestAnonStructFlatten(t *testing.T) {
 		},
 		Inner: Inner{},
 	}
-	actual := Flatten(src)
+	actual := Flatten(src, ".")
 	assert.Equal(t, expecting, actual)
 }
 
 func BenchmarkFlatten(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		_ = Flatten(example)
+		_ = Flatten(example, ".")
 	}
 }
 
 func BenchmarkExpand(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		_ = Expand(flat)
+		_ = Expand(flat, ".")
 	}
 }
 
 func BenchmarkAll(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		flat := Flatten(example)
-		_ = Expand(flat)
+		flat := Flatten(example, ".")
+		_ = Expand(flat, ".")
 	}
 }
