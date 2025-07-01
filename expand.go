@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	arrayIndexRegexp = regexp.MustCompile("\\[\\d*]")
+	arrayIndexRegexp = regexp.MustCompile(`[\d*]`)
 )
 
 func Expand(flatMap map[string]interface{}, opts ...option) interface{} {

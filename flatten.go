@@ -56,8 +56,12 @@ func FlattenPrefixedToResult(value interface{}, opts *bellowsOptions, m map[stri
 		numField := original.NumField()
 		base := ""
 		for i := 0; i < numField; i++ {
-			childValue := original.Field(i)
 			f := t.Field(i)
+			// Skip unexported fields (PkgPath is empty for exported fields)
+			if f.PkgPath != "" {
+				continue
+			}
+			childValue := original.Field(i)
 			childKey := f.Name
 			if f.Anonymous {
 				childKey = ""
