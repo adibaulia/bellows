@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	arrayIndexRegexp = regexp.MustCompile(`[\d*]`)
+	arrayIndexRegexp = regexp.MustCompile(`\[[^\]]*\]`)
 )
 
 func Expand(flatMap map[string]interface{}, opts ...option) interface{} {
@@ -80,6 +80,7 @@ func getArrayIndex(part string) (int, bool) {
 		return 0, false
 	}
 
+	// Remove the brackets from the matched string [123] -> 123
 	i, err := strconv.Atoi(index[1 : len(index)-1])
 	if err != nil {
 		return 0, false
